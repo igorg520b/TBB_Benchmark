@@ -8,20 +8,23 @@
 #include <limits>
 #include <chrono>
 #include <thread>
-#define TBB_PREVIEW_CONCURRENT_ORDERED_CONTAINERS 1
-#include <concurrent_set.h>
-#include <concurrent_unordered_set.h>
+
+#include <tbb/concurrent_set.h>
+#include <tbb/concurrent_unordered_set.h>
 
 
 
 int main()
 {
+    std::cout << "start" << std::endl;
+
     std::cout << "num_threads " << omp_get_max_threads() << std::endl;
     std::cout << "testing threads" << std::endl;
-    int nthreads, tid;
 #pragma omp parallel
     { std::cout << "  " << omp_get_thread_num() << "  "; }
-    std::cout << '\n';
+    std::cout << std::endl;
+
+
 
     typedef unsigned int mytype;
     std::set<mytype> std_set;
@@ -43,6 +46,8 @@ int main()
     std::cout << "\n\n"<< std::left << std::setw(10) << "N" << std::setw(15) << "std_set";
     std::cout << std::setw(15) << "tbb_single" << std::setw(15) << "tbb_multi";
     std::cout << std::setw(15) << "std_unordered" << std::setw(15) << "tbb_unordered" << '\n';
+
+
     for(unsigned test=0;test<nTests;test++)
     {
         std_set.clear();
@@ -71,7 +76,7 @@ int main()
 
         t1 = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for
-        for(unsigned i=0;i<nValuesInserted;i++) tbb_set2.insert(random_sequence[i]);
+        for(int i=0;i<nValuesInserted;i++) tbb_set2.insert(random_sequence[i]);
         t2 = std::chrono::high_resolution_clock::now();
         auto d3 = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
         std::cout << std::setw(15) << d3 << std::flush;
@@ -84,7 +89,7 @@ int main()
 
         t1 = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for
-        for(unsigned i=0;i<nValuesInserted;i++) tbb_unordered_set.insert(random_sequence[i]);
+        for(int i=0;i<nValuesInserted;i++) tbb_unordered_set.insert(random_sequence[i]);
         t2 = std::chrono::high_resolution_clock::now();
         auto d5 = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
         std::cout << std::setw(15) << d5 << std::endl;
